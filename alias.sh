@@ -25,3 +25,6 @@ alias n.='nvim .'
 alias so='source ~/.zshrc'
 
 alias algrep='alias | rg'
+
+alias zy='zypper'
+alias _zy='sudo zypper'
