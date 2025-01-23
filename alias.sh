@@ -1,5 +1,6 @@
 alias tses='sesh connect "$(sesh list | fzf)"'
 alias ls='ls --color'
+alias ll='ls -lh'
 alias lll='ls -alrt'
 
 bindkey -s '^h' 'tses\n'
