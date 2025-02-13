@@ -22,6 +22,7 @@ alias sysup='sudo -p "Key for system-upgrade: ***** " \
 alias :q='exit'
 
 alias n.='nvim .'
+alias mvim='NVIM_APPNAME=mini nvim'
 
 alias so='source ~/.zshrc'
 
@@ -33,7 +34,7 @@ alias untar='tar -zxvf'
 
 ## create a new directory and move into it immediately
 newdir() {
-	mkdir -p "$1" && cd "$1"
+	mkdir -p "$1" && cd "$1" || exit
 }
 
 ## Log the installed packages via zypper
@@ -41,13 +42,15 @@ export LOG_ZYPPER=${LOG_ZYPPER:-./zypper-install-all.sh}
 
 # Ensure log file exists and is initialized
 initialize_log_file() {
-	if [ ! -f "$LOG_ZYPPER" -o ! -s "$LOG_ZYPPER" ]; then
+	if [ ! -f "$LOG_ZYPPER" ] || [ -s "$LOG_ZYPPER" ]; then
 		echo "Creating or initializing log file: $LOG_ZYPPER"
 		echo "#!/usr/bin/env sh" >"$LOG_ZYPPER"
-		echo "" >>"$LOG_ZYPPER"
-		echo "set -euxo pipefail" >>"$LOG_ZYPPER"
-		echo "" >>"$LOG_ZYPPER"
-		echo "sudo zypper install \\" >>"$LOG_ZYPPER"
+		{
+			echo ""
+			echo "set -euxo pipefail"
+			echo ""
+			echo "sudo zypper install \\"
+		} >> "$LOG_ZYPPER"
 	fi
 }
 
@@ -65,7 +68,7 @@ log-zypper() {
 	if sudo zypper install "$@"; then
 		append_to_log "$@"
 	else
-		echo "Error: Failed to install packages: $@" >&2
+		echo "Error: Failed to install packages: $*" >&2
 	fi
 }
 
