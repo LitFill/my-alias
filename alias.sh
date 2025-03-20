@@ -69,40 +69,45 @@ newdir() {
 }
 
 ## Log the installed packages via zypper
-export LOG_ZYPPER=${LOG_ZYPPER:-./zypper-install-all.sh}
+# export LOG_ZYPPER=${LOG_ZYPPER:-./zypper-install-all.sh}
 
 # Ensure log file exists and is initialized
-initialize_log_file() {
-	if [ ! -f "$LOG_ZYPPER" ] || [ -s "$LOG_ZYPPER" ]; then
-		echo "Creating or initializing log file: $LOG_ZYPPER"
-		echo "#!/usr/bin/env sh" >"$LOG_ZYPPER"
-		{
-			echo ""
-			echo "set -euxo pipefail"
-			echo ""
-			echo "sudo zypper install \\"
-		} >> "$LOG_ZYPPER"
-	fi
+# initialize_log_file() {
+# 	if [ ! -f "$LOG_ZYPPER" ] || [ -s "$LOG_ZYPPER" ]; then
+# 		echo "Creating or initializing log file: $LOG_ZYPPER"
+# 		echo "#!/usr/bin/env sh" >"$LOG_ZYPPER"
+# 		{
+# 			echo ""
+# 			echo "set -euxo pipefail"
+# 			echo ""
+# 			echo "sudo zypper install \\"
+# 		} >> "$LOG_ZYPPER"
+# 	fi
+# }
+
+# log-zypper() {
+# 	initialize_log_file
+#
+# 	append_to_log() {
+# 		# Append each argument to the log file
+# 		for arg in "$@"; do
+# 			echo -e "\t$arg \\" >>"$LOG_ZYPPER"
+# 		done
+# 	}
+#
+# 	# Run zypper and log installed packages if successful
+# 	if sudo zypper install "$@"; then
+# 		append_to_log "$@"
+# 	else
+# 		echo "Error: Failed to install packages: $*" >&2
+# 	fi
+# }
+
+# alias zy='zypper'
+# alias _zy='sudo zypper'
+# alias zyin='log-zypper'
+
+# scheme compile
+function schemec() {
+    echo "(compile-file \"$1\")" | scheme -q
 }
-
-log-zypper() {
-	initialize_log_file
-
-	append_to_log() {
-		# Append each argument to the log file
-		for arg in "$@"; do
-			echo -e "\t$arg \\" >>"$LOG_ZYPPER"
-		done
-	}
-
-	# Run zypper and log installed packages if successful
-	if sudo zypper install "$@"; then
-		append_to_log "$@"
-	else
-		echo "Error: Failed to install packages: $*" >&2
-	fi
-}
-
-alias zy='zypper'
-alias _zy='sudo zypper'
-alias zyin='log-zypper'
