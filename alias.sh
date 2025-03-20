@@ -1,10 +1,12 @@
-alias tses='sesh connect "$(sesh list | fzf)"'
+# alias tses='sesh connect "$(sesh list | fzf)"'
 alias ls='ls --color'
 alias ll='ls -lh'
 alias lll='ls -alrt'
+alias ..='cd ..'
+alias ...='cd ../..'
 
-bindkey -s '^h' 'tses\n'
-bindkey -s '^n' 'nvim .\n'
+# bindkey -s '^h' 'tses\n'
+# bindkey -s '^n' 'nvim .\n'
 
 # tree
 alias tree='erd --disk-usage line --icons --layout inverted'
