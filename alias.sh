@@ -20,6 +20,10 @@ function sysup() {
         echo "[INFO] Terdeteksi distribusi Arch Linux."
         sudo pacman -Syu
         package_manager="pacman"
+    elif command -v pkg &> /dev/null; then
+        echo "[INFO] Terdeteksi distribusi Termux."
+        pkg update && pkg upgrade
+        package_manager="pkg"
     elif command -v apt-get &> /dev/null; then
         echo "[INFO] Terdeteksi distribusi Debian/Ubuntu."
         sudo apt update && sudo apt upgrade
