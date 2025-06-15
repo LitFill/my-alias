@@ -120,3 +120,8 @@ newdir() {
 function schemec() {
     echo "(compile-file \"$1\")" | scheme -q
 }
+
+function wifi() {
+    sudo iwctl station list
+    sudo dhcpcd
+}
