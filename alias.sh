@@ -16,29 +16,31 @@ alias tree2='tree -L 2'
 
 function sysup() {
     echo "[INFO] Memulai pembaruan sistem..."
+    local package_manager="unknown"
+
     if command -v pacman &> /dev/null; then
         echo "[INFO] Terdeteksi distribusi Arch Linux."
-        sudo pacman -Syu
+        sudo pacman -Syu --noconfirm
         package_manager="pacman"
     elif command -v pkg &> /dev/null; then
         echo "[INFO] Terdeteksi distribusi Termux."
-        pkg update && pkg upgrade
+        pkg update && pkg upgrade -y
         package_manager="pkg"
     elif command -v apt-get &> /dev/null; then
         echo "[INFO] Terdeteksi distribusi Debian/Ubuntu."
-        sudo apt update && sudo apt upgrade
+        sudo apt-get update && sudo apt-get upgrade -y
         package_manager="apt"
     elif command -v dnf &> /dev/null; then
         echo "[INFO] Terdeteksi distribusi Fedora/CentOS/RHEL (dnf)."
-        sudo dnf update
+        sudo dnf upgrade -y
         package_manager="dnf"
     elif command -v yum &> /dev/null; then
         echo "[INFO] Terdeteksi distribusi CentOS/RHEL (yum)."
-        sudo yum update
+        sudo yum update -y
         package_manager="yum"
     elif command -v zypper &> /dev/null; then
         echo "[INFO] Terdeteksi distribusi openSUSE."
-        sudo zypper dup
+        sudo zypper dup --non-interactive
         package_manager="zypper"
     else
         echo "[WARN] Distribusi tidak dikenali atau manajer paket tidak didukung."
@@ -46,11 +48,14 @@ function sysup() {
         return 1
     fi
 
-    if [ $? -eq 0 ]; then
-        echo "[INFO] $(date) - Pembaruan sistem berhasil menggunakan $package_manager!" | tee -a ~/update.log
-    else
+    local exit_code=$?
+
+    if [ $exit_code -neq 0 ]; then
         echo "[ERROR] $(date) - Pembaruan sistem gagal menggunakan $package_manager!" | tee -a ~/update.log
         echo "[ERROR] Terjadi kesalahan saat pembaruan. Silakan periksa output di atas."
+        return $exit_code
+    else
+        echo "[INFO] $(date) - Pembaruan sistem berhasil menggunakan $package_manager!" | tee -a ~/update.log
     fi
 }
 
