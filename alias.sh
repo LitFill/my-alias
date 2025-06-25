@@ -102,3 +102,7 @@ killf() {
 # File & Content Search (requires fzf, ripgrep)
 alias fv='fzf | xargs nvim'
 alias rgv='rg --line-number --no-heading --smart-case "${1}" | fzf --ansi --delimiter : --preview "bat --color=always {1} --highlight-line {2}" --preview-window "up,60%,border-bottom,+{2}+3/3,~3" | cut -d: -f1,2 | xargs -r nvim +.'
+
+# Network
+alias myip='curl ifconfig.me || curl ifconfig.co'
+alias ports='sudo netstat -tulpn'
