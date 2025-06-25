@@ -1,127 +1,80 @@
-# alias tses='sesh connect "$(sesh list | fzf)"'
+# General Aliases
 alias ls='ls --color'
 alias ll='ls -lh'
-alias lll='ls -alrt'
 alias ..='cd ..'
 alias ...='cd ../..'
-
-# bindkey -s '^h' 'tses\n'
-# bindkey -s '^n' 'nvim .\n'
-
-# tree
-alias tree='erd --disk-usage line --icons --layout inverted'
-alias treee='erd --long --disk-usage line --icons --time mod --layout inverted'
-alias tree1='tree -L 1'
-alias tree2='tree -L 2'
-
-function sysup() {
-    echo "[INFO] Memulai pembaruan sistem..."
-    local package_manager="unknown"
-
-    if command -v pacman &> /dev/null; then
-        echo "[INFO] Terdeteksi distribusi Arch Linux."
-        sudo pacman -Syu --noconfirm
-        package_manager="pacman"
-    elif command -v pkg &> /dev/null; then
-        echo "[INFO] Terdeteksi distribusi Termux."
-        pkg update && pkg upgrade -y
-        package_manager="pkg"
-    elif command -v apt-get &> /dev/null; then
-        echo "[INFO] Terdeteksi distribusi Debian/Ubuntu."
-        sudo apt-get update && sudo apt-get upgrade -y
-        package_manager="apt"
-    elif command -v dnf &> /dev/null; then
-        echo "[INFO] Terdeteksi distribusi Fedora/CentOS/RHEL (dnf)."
-        sudo dnf upgrade -y
-        package_manager="dnf"
-    elif command -v yum &> /dev/null; then
-        echo "[INFO] Terdeteksi distribusi CentOS/RHEL (yum)."
-        sudo yum update -y
-        package_manager="yum"
-    elif command -v zypper &> /dev/null; then
-        echo "[INFO] Terdeteksi distribusi openSUSE."
-        sudo zypper dup --non-interactive
-        package_manager="zypper"
-    else
-        echo "[WARN] Distribusi tidak dikenali atau manajer paket tidak didukung."
-        echo "[WARN] Silakan jalankan perintah pembaruan secara manual."
-        return 1
-    fi
-
-    local exit_code=$?
-
-    if [ $exit_code -neq 0 ]; then
-        echo "[ERROR] $(date) - Pembaruan sistem gagal menggunakan $package_manager!" | tee -a ~/update.log
-        echo "[ERROR] Terjadi kesalahan saat pembaruan. Silakan periksa output di atas."
-        return $exit_code
-    else
-        echo "[INFO] $(date) - Pembaruan sistem berhasil menggunakan $package_manager!" | tee -a ~/update.log
-    fi
-}
-
 alias :q='exit'
-
 alias n.='nvim .'
 alias mvim='NVIM_APPNAME=mini nvim'
-
 alias so='source ~/.zshrc'
-
 alias algrep='alias | rg'
-
-# alias fmths='fourmolu -i --column-limit=80 --function-arrows=leading-args'
-
 alias untar='tar -zxvf'
 
-## create a new directory and move into it immediately
+# Tree Aliases
+alias tree='erd --disk-usage line --icons --layout inverted'
+alias treel='erd --long --disk-usage line --icons --time mod --layout inverted'
+
+# System Update Function
+sysup() {
+	echo "[INFO] Starting system update..."
+	local pm_command
+	local package_manager
+
+	if command -v pacman &>/dev/null; then
+		package_manager="pacman"
+		echo "[INFO] Arch Linux distribution detected."
+		pm_command="sudo pacman -Syu --noconfirm"
+	elif command -v pkg &>/dev/null; then
+		package_manager="pkg"
+		echo "[INFO] Termux distribution detected."
+		pm_command="pkg update && pkg upgrade -y"
+	elif command -v apt-get &>/dev/null; then
+		package_manager="apt"
+		echo "[INFO] Debian/Ubuntu distribution detected."
+		pm_command="sudo apt-get update && sudo apt-get upgrade -y"
+	elif command -v dnf &>/dev/null; then
+		package_manager="dnf"
+		echo "[INFO] Fedora/CentOS/RHEL (dnf) distribution detected."
+		pm_command="sudo dnf upgrade -y"
+	elif command -v yum &>/dev/null; then
+		package_manager="yum"
+		echo "[INFO] CentOS/RHEL (yum) distribution detected."
+		pm_command="sudo yum update -y"
+	elif command -v zypper &>/dev/null; then
+		package_manager="zypper"
+		echo "[INFO] openSUSE distribution detected."
+		pm_command="sudo zypper dup --non-interactive"
+	else
+		echo "[WARN] Unrecognized distribution or unsupported package manager."
+		echo "[WARN] Please run the update command manually."
+		return 1
+	fi
+
+	# Execute the command
+	eval "$pm_command" | tee ~/latest-update.log
+	local exit_code=${PIPESTATUS[0]}
+
+	if [ $exit_code -eq 0 ]; then
+		echo "[INFO] $(date) - System update successful using $package_manager!" | tee -a ~/update.log
+	else
+		echo "[ERROR] $(date) - System update failed using $package_manager!" | tee -a ~/update.log
+		echo "[ERROR] An error occurred during the update. Please check the output above."
+		return $exit_code
+	fi
+}
+
+# Directory Management
 newdir() {
-	mkdir -p "$1" && cd "$1" || exit
+	mkdir -p "$1" && cd "$1"
 }
 
-## Log the installed packages via zypper
-# export LOG_ZYPPER=${LOG_ZYPPER:-./zypper-install-all.sh}
-
-# Ensure log file exists and is initialized
-# initialize_log_file() {
-# 	if [ ! -f "$LOG_ZYPPER" ] || [ -s "$LOG_ZYPPER" ]; then
-# 		echo "Creating or initializing log file: $LOG_ZYPPER"
-# 		echo "#!/usr/bin/env sh" >"$LOG_ZYPPER"
-# 		{
-# 			echo ""
-# 			echo "set -euxo pipefail"
-# 			echo ""
-# 			echo "sudo zypper install \\"
-# 		} >> "$LOG_ZYPPER"
-# 	fi
-# }
-
-# log-zypper() {
-# 	initialize_log_file
-#
-# 	append_to_log() {
-# 		# Append each argument to the log file
-# 		for arg in "$@"; do
-# 			echo -e "\t$arg \\" >>"$LOG_ZYPPER"
-# 		done
-# 	}
-#
-# 	# Run zypper and log installed packages if successful
-# 	if sudo zypper install "$@"; then
-# 		append_to_log "$@"
-# 	else
-# 		echo "Error: Failed to install packages: $*" >&2
-# 	fi
-# }
-
-# alias zy='zypper'
-# alias _zy='sudo zypper'
-# alias zyin='log-zypper'
-
-# scheme compile
-function schemec() {
-    echo "(compile-file \"$1\")" | scheme -q
+# Scheme Compilation
+schemec() {
+	echo "(compile-file \"$1\")" | scheme -q
 }
 
-function wifi() {
-    sudo iwctl station list
-    sudo dhcpcd
+# WiFi Management
+wifi() {
+	sudo iwctl station list
+	sudo dhcpcd
 }
