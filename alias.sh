@@ -106,3 +106,15 @@ alias rgv='rg --line-number --no-heading --smart-case "${1}" | fzf --ansi --deli
 # Network
 alias myip='curl ifconfig.me || curl ifconfig.co'
 alias ports='sudo netstat -tulpn'
+
+# Process Management
+alias psg='ps aux | grep -v grep | grep -i'
+killf() {
+    local pid
+    pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
+
+    if [ "x$pid" != "x" ]
+    then
+        echo $pid | xargs kill -${1:-9}
+    fi
+}
