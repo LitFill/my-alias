@@ -1,4 +1,6 @@
+#!/bin/bash
 # General Aliases
+# alias tses='sesh connect "$(sesh list | fzf)"'
 alias ls='ls --color'
 alias ll='ls -lh'
 alias ..='cd ..'
@@ -8,6 +10,9 @@ alias n.='nvim .'
 alias mvim='NVIM_APPNAME=mini nvim'
 alias so='source ~/.zshrc'
 alias algrep='alias | rg'
+
+alias fmths='fourmolu -i --column-limit=80 --function-arrows=leading-args'
+
 alias untar='tar -zxvf'
 
 # Tree Aliases
@@ -23,7 +28,7 @@ sysup() {
 	if command -v pacman &>/dev/null; then
 		package_manager="pacman"
 		echo "[INFO] Arch Linux distribution detected."
-		pm_command="sudo pacman -Syu --noconfirm"
+		pm_command="sudo pacman -Syu --confrim"
 	elif command -v pkg &>/dev/null; then
 		package_manager="pkg"
 		echo "[INFO] Termux distribution detected."
@@ -70,33 +75,13 @@ newdir() {
 
 # Scheme Compilation
 schemec() {
-	echo "(compile-file \"$1\")" | scheme -q
+	echo "(compile-file "$1")" | scheme -q
 }
 
 # WiFi Management
 wifi() {
 	sudo iwctl station list
 	sudo dhcpcd
-}
-
-# File & Content Search (requires fzf, ripgrep)
-alias fv='fzf | xargs nvim'
-alias rgv='rg --line-number --no-heading --smart-case "${1}" | fzf --ansi --delimiter : --preview "bat --color=always {1} --highlight-line {2}" --preview-window "up,60%,border-bottom,+{2}+3/3,~3" | cut -d: -f1,2 | xargs -r nvim +.'
-
-# Network
-alias myip='curl ifconfig.me || curl ifconfig.co'
-alias ports='sudo netstat -tulpn'
-
-# Process Management
-alias psg='ps aux | grep -v grep | grep -i'
-killf() {
-    local pid
-    pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
-
-    if [ "x$pid" != "x" ]
-    then
-        echo $pid | xargs kill -${1:-9}
-    fi
 }
 
 # File & Content Search (requires fzf, ripgrep)
