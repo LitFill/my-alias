@@ -76,6 +76,7 @@ schemec() {
 # WiFi Management
 wifi() {
 	sudo iwctl station list
+    sleep 3
 	sudo dhcpcd
 }
 
