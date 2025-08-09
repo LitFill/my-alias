@@ -59,23 +59,23 @@ sysup() {
 	eval "$pm_command" | tee ~/latest-update.log
 	local exit_code=${PIPESTATUS[0]}
 
-	if [ $exit_code -eq 0 ]; then
+	if [ "$exit_code" -eq 0 ]; then
 		echo "[INFO] $(date) - System update successful using $package_manager!" | tee -a ~/update.log
 	else
 		echo "[ERROR] $(date) - System update failed using $package_manager!" | tee -a ~/update.log
 		echo "[ERROR] An error occurred during the update. Please check the output above."
-		return $exit_code
+		return "$exit_code"
 	fi
 }
 
 # Directory Management
 newdir() {
-	mkdir -p "$1" && cd "$1"
+	mkdir -p "$1" && cd "$1" || exit
 }
 
 # Scheme Compilation
 schemec() {
-	echo "(compile-file "$1")" | scheme -q
+	echo "(compile-file ""$1"")" | scheme -q
 }
 
 # WiFi Management
@@ -84,9 +84,32 @@ wifi() {
 	sudo dhcpcd
 }
 
+bvim() {
+    NVIM_APPNAME=nvim12 bob run nightly "$@"
+}
+
 # File & Content Search (requires fzf, ripgrep)
 alias fv='fzf | xargs nvim'
-alias rgv='rg --line-number --no-heading --smart-case "${1}" | fzf --ansi --delimiter : --preview "bat --color=always {1} --highlight-line {2}" --preview-window "up,60%,border-bottom,+{2}+3/3,~3" | cut -d: -f1,2 | xargs -r nvim +.'
+rgv() {
+    local file_line
+    file_line=$(
+        rg --line-number --no-heading --smart-case "${1}"           \
+        | fzf --ansi                                                \
+            --delimiter :                                           \
+            --preview 'bat --color=always {1} --highlight-line {2}' \
+            --preview-window 'up,60%,border-bottom,+{2}+3/3,~3'
+    )
+
+    if [[ -n "$file_line" ]]; then
+        local file
+        local line
+        file=$(echo "$file_line" | cut -d: -f1)
+        line=$(echo "$file_line" | cut -d: -f2)
+        if [[ -n "$file" && -n "$line" ]]; then
+            nvim "+${line}" "${file}"
+        fi
+    fi
+}
 
 # Network
 alias myip='curl ifconfig.me || curl ifconfig.co'
@@ -100,6 +123,6 @@ killf() {
 
     if [ "x$pid" != "x" ]
     then
-        echo $pid | xargs kill -${1:-9}
+        echo "$pid" | xargs kill -"${1:-9}"
     fi
 }
