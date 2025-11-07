@@ -81,7 +81,9 @@ schemec() {
 # WiFi Management
 wifi() {
 	sudo iwctl station list
-	sudo dhcpcd
+    sleep 2
+	# Rebind the existing lease instead of starting a new daemon
+	sudo dhcpcd -n
 }
 
 bvim() {
